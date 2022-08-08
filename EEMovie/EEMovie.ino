@@ -5,30 +5,18 @@
 #include <Arduino_JSON.h>
 
 #include "web.h"
-//#include "statusled.h"
 
 /***************************************************************
  * Configuracion Rapida
  ***************************************************************/
 
-const char* ssid     = "FINAL2";
+const char* ssid     = "FINAL3";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
  * Setup del PID
  ***************************************************************/
 String outputVal;
-
-/***************************************************************
- * Setup del sensor de temperatura
- ***************************************************************/
-
-//#define DS_DATA_PIN 34
-#define DS_CONN_PIN 35
-
-//  Variables de Estado del sensor de temperatura
-int ds_state = HIGH;
-int ds_state_last = HIGH;
 
 /***************************************************************
  * Setup servidor web
@@ -87,33 +75,29 @@ void initWebSocket() {
  * Setup la placa ESP
  ***************************************************************/
 // PWM
-#define  PWM_PIN 4
-#define  PWM_CH  0
-#define  PWM_F   1
-#define  PWM_RES 8
+// the number of the LED pin
+const int PWMPin = 4;  // 16 corresponds to GPIO16
 
-//  Timer
-unsigned long lastTime = 0;
-unsigned long timerDelay = 100;
+// setting PWM properties
+const int freq = 500;
+const int ledChannel = 0;
+const int resolution = 8;
 
 /***************************************************************
  * Funcionamiento del ESP
  ***************************************************************/
-
 void setup() {
+  // PWM SETUP
+  // configure LED PWM functionalitites
+  ledcSetup(ledChannel, freq, resolution);
+  
+  // attach the channel to the GPIO to be controlled
+  ledcAttachPin(PWMPin, ledChannel);
+  //*******************************
+
   // Serial port for debugging purposes
   Serial.begin(115200);
   Serial.println();
-
-  // Status LED initialization
-  //init_status_led();
-  
-  pinMode(DS_CONN_PIN, INPUT);
-
-  //  Startup PWM
-  pinMode(PWM_PIN, OUTPUT);
-  ledcSetup(PWM_CH, PWM_F, PWM_RES);
-  ledcAttachPin(PWM_PIN, PWM_CH);
 
   //  Startup Access Point: generate its own access point to connect to the ESP.
   WiFi.softAP(ssid, password);
@@ -130,12 +114,12 @@ void setup() {
   //  Startup Webserver
   initWebSocket();
 
-  // Route for root / web page
+  // Rutina de acceso
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html);
   });
   
-  // GET input value on <ESP_IP>/slider_p?value=<inputMessage>
+  // Rutina de cambio de slider
   server.on("/slider_f", HTTP_GET, [](AsyncWebServerRequest * request){
     String inputMessage;
     if(request->hasParam(PARAM_INPUT)) {
@@ -154,6 +138,7 @@ void setup() {
     request->send_P(200, "text/plain", "OK");
   });
 
+  // Rutina de cambio de checkbox
   server.on("/checkbox", HTTP_GET, [](AsyncWebServerRequest * request){
     String inputMessage;
     Serial.print("checkbox inputmessage: ");
@@ -161,16 +146,9 @@ void setup() {
     if(request->hasParam(PARAM_INPUT)) {
       inputMessage = request->getParam(PARAM_INPUT)->value();
       checkbox = inputMessage;
-      
-      ledcWrite(PWM_CH, 0);
-      
-      if(checkbox == "true")
-      {
-        ledcWrite(PWM_CH, 0.5);
-      }
       Serial.print("checkbox value: ");
       Serial.println(checkbox);
-      //  Enable PWM or PID output
+
       notifyClients(get_web_values());
     }
     else {
@@ -186,30 +164,22 @@ void setup() {
   notifyClients(get_web_values());
 }
 
+
+/***************************************************************
+ * Funcionamiento del programa
+ ***************************************************************/
 void loop() {
-  if ((millis() - lastTime) > timerDelay)
-  {
-    int reading = digitalRead(DS_CONN_PIN);
-    if (reading != ds_state_last)
-    {
-      ds_state = reading;
-      notifyClients(get_ds_values());
-    }
+  // increase the LED brightness
+  for(int dutyCycle = 0; dutyCycle <= 255; dutyCycle++){   
+    // changing the LED brightness with PWM
+    ledcWrite(ledChannel, dutyCycle);
+    delay(15);
+  }
 
-    if(ds_state == LOW)
-    {
-      notifyClients(get_ds_values()); 
-      
-    }
-    ds_state_last = reading;
-
-    if(checkbox == "true")
-    {
-      Serial.print("Output freq: ");
-      Serial.println(outputVal);
-    }
-    
-    lastTime = millis();
-    //Serial.print(".");
-  }  
+  // decrease the LED brightness
+  for(int dutyCycle = 255; dutyCycle >= 0; dutyCycle--){
+    // changing the LED brightness with PWM
+    ledcWrite(ledChannel, dutyCycle);   
+    delay(15);
+  }
 }
