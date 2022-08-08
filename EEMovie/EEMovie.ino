@@ -176,7 +176,7 @@ void loop() {
   // read the input on analog pin GIOP36:
   int analogValue = analogRead(36);
   // Rescale to potentiometer's voltage (from 0V to 3.3V):
-  float voltage = floatMap(analogValue, 0, 4095, 0, 3.3);
+  float duty = floatMap(analogValue, 0, 4095, 0, 255);
   // print out the value you read:
   Serial.print("Analog: ");
   Serial.print(analogValue);
@@ -184,14 +184,15 @@ void loop() {
 
   // changing the PWM from webpage
   if(checkbox != "false"){
-    ledcWrite(ledChannel2, 127);
     ledcSetup(ledChannel, slider_f.toInt(), resolution);
     ledcWrite(ledChannel, 127);
+    
+    ledcWrite(ledChannel2, (int) duty);
   } 
   else {
     ledcSetup(ledChannel, freq, resolution);
     ledcWrite(ledChannel, 127);
-    ledcWrite(ledChannel2, 0);
+    ledcWrite(ledChannel2, 60);
   }
   delay(10); //Para no loopear tan rápido 
 }
