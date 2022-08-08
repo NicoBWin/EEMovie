@@ -32,7 +32,7 @@ const int PWMPin2 = 2;  // 2 corresponds to GPIO2
 const int freq = 40;
 const int freq2 = 500;
 const int ledChannel = 0;
-const int ledChannel2 = 0;
+const int ledChannel2 = 2;
 const int resolution = 8;
 
 
