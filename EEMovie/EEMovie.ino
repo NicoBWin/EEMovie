@@ -29,7 +29,7 @@ const int PWMPin = 4;  // 4 corresponds to GPIO4
 const int PWMPin2 = 2;  // 2 corresponds to GPIO2
 
 // Setting PWM properties
-const int freq = 40;
+const int freq = 100;
 const int freq2 = 500;
 const int ledChannel = 0;
 const int ledChannel2 = 2;
@@ -192,7 +192,7 @@ void loop() {
   else {
     ledcSetup(ledChannel, freq, resolution);
     ledcWrite(ledChannel, 127);
-    ledcWrite(ledChannel2, 60);
+    ledcWrite(ledChannel2, 0);
   }
-  delay(10); //Para no loopear tan rápido 
+  delay(1); //Para no loopear tan rápido 
 }
