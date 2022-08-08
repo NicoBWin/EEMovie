@@ -25,13 +25,13 @@ const char* password = "123456789"; //Capaz usar solo numeros
  * Setup PWM
  ***************************************************************/
 // The ouputs
-const int PWMPin = 4;  // 4 corresponds to GPIO4
+const int PWMPin1 = 4;  // 4 corresponds to GPIO4
 const int PWMPin2 = 2;  // 2 corresponds to GPIO2
 
 // Setting PWM properties
-const int freq = 100;
+const int freq1 = 500;
 const int freq2 = 500;
-const int ledChannel = 0;
+const int ledChannel = 1;
 const int ledChannel2 = 2;
 const int resolution = 8;
 
@@ -94,14 +94,11 @@ void initWebSocket() {
  * Setup del ESP
  ***************************************************************/
 void setup() {
-  // Configure LED PWM functionalitites
-  ledcSetup(ledChannel, freq, resolution);
-  ledcSetup(ledChannel2, freq2, resolution);
   // Attach the channel to the GPIO to be controlled
-  ledcAttachPin(PWMPin, ledChannel);
+  ledcAttachPin(PWMPin1, ledChannel);
   ledcAttachPin(PWMPin2, ledChannel2);
   //***************************
-
+  
   // Serial port for debugging purposes
   Serial.begin(115200);
   Serial.println();
@@ -178,21 +175,24 @@ void loop() {
   // Rescale to potentiometer's voltage (from 0V to 3.3V):
   float duty = floatMap(analogValue, 0, 4095, 0, 255);
   // print out the value you read:
-  Serial.print("Analog: ");
-  Serial.print(analogValue);
+  //Serial.print("Analog: ");
+  //Serial.print((int) duty);
   
-
+  ledcSetup(ledChannel2, freq2, resolution);
+  int Webfrec = slider_f.toInt();
+    
   // changing the PWM from webpage
   if(checkbox != "false"){
-    ledcSetup(ledChannel, slider_f.toInt(), resolution);
+    ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
     ledcWrite(ledChannel, 127);
-    
+
     ledcWrite(ledChannel2, (int) duty);
   } 
   else {
-    ledcSetup(ledChannel, freq, resolution);
+    ledcSetup(ledChannel, freq1, resolution);
     ledcWrite(ledChannel, 127);
+    
     ledcWrite(ledChannel2, 0);
   }
-  delay(1); //Para no loopear tan rápido 
+  delay(10); //Para no loopear tan rápido 
 }
