@@ -100,7 +100,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         <span id="watch_f"></span>Hz
       </div>
       <div>
-        <input type="range" oninput="getValue()" id="slider_f" min="0" max="4" step="0.1" value ="0" class="input_slider">
+        <input type="range" id="slider_f" oninput="updateFreqSlider(this)" min="0" max="4" step="0.1" value ="0" class="input_slider">
       </div>
     </div>
   </div>
@@ -121,7 +121,6 @@ var sw_ctrl = document.getElementById("sw_ctrl");
 
 watch_state.innerHTML = "APAGADO";
 
-slider_f.oninput = function() {watch_f.innerHTML = Math.floor(Math.pow(10, +slider_f.value));}
 // sw_ctrl.disabled = true;
 
 function toggle_ctrl(element) {
@@ -138,17 +137,13 @@ function toggle_ctrl(element) {
 }
 
 
-function updSlider(element) {
-  var sliderID = element.id.charAt(element.id.length-1);
-  var watch = document.getElementById("watch_"+sliderID);
-  var sliderVal = element.value;
+function updateFreqSlider(element) {
+  var sliderVal = Math.floor(Math.pow(10, +element.value));
 
-  watch.innerHTML = sliderVal;
-  //console.log(element.id);
-  //console.log(watch.id+"="+sliderVal);
+  watch_f.innerHTML = sliderVal;
   
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", "/"+element.id+"?value="+sliderVal, true);
+  xhr.open("GET", "/slider_f?value="+sliderVal, true);
   xhr.send();
 }
 
