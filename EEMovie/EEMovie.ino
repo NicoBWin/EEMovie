@@ -1,27 +1,43 @@
+/***************************************************************
+ * @authors: Alan Mechoulam | Nicolás Bustelo
+ * @brief: Simulador de electroestimulador para una película
+ ***************************************************************/
+
+/***************************************************************
+ * Bibliotecas
+ ***************************************************************/
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <Arduino.h>
 #include <Arduino_JSON.h>
 
+// Página Web (HTML en const char)
 #include "web.h"
 
 /***************************************************************
- * Configuracion Rapida
+ * Setup Server credentials
  ***************************************************************/
-
-const char* ssid     = "FINAL3";
+const char* ssid     = "FINAL4";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
- * Setup del PID
+ * Setup PWM
  ***************************************************************/
-String outputVal;
+// The ouputs
+const int PWMPin = 4;  // 4 corresponds to GPIO4
+const int PWMPin2 = 2;  // 2 corresponds to GPIO2
+
+// Setting PWM properties
+const int freq = 500;
+const int freq2 = 1000;
+const int ledChannel = 0;
+const int ledChannel2 = 0;
+const int resolution = 8;
 
 /***************************************************************
  * Setup servidor web
  ***************************************************************/
-JSONVar ds_info;
 JSONVar web_info;
 
 String slider_f = "0";
@@ -31,12 +47,6 @@ const char* PARAM_INPUT = "value";
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
-
-String get_ds_values(){
-  ds_info["ds_bool"]= ds_state;
-
-  return JSON.stringify(ds_info);
-}
 
 String get_web_values(){
   web_info["slider_f"] = slider_f;
@@ -72,28 +82,16 @@ void initWebSocket() {
 
 
 /***************************************************************
- * Setup la placa ESP
- ***************************************************************/
-// PWM
-// the number of the LED pin
-const int PWMPin = 4;  // 16 corresponds to GPIO16
-
-// setting PWM properties
-const int freq = 500;
-const int ledChannel = 0;
-const int resolution = 8;
-
-/***************************************************************
- * Funcionamiento del ESP
+ * Setup del ESP
  ***************************************************************/
 void setup() {
-  // PWM SETUP
-  // configure LED PWM functionalitites
+  // Configure LED PWM functionalitites
   ledcSetup(ledChannel, freq, resolution);
-  
-  // attach the channel to the GPIO to be controlled
+  ledcSetup(ledChannel2, freq2, resolution);
+  // Attach the channel to the GPIO to be controlled
   ledcAttachPin(PWMPin, ledChannel);
-  //*******************************
+  ledcAttachPin(PWMPin2, ledChannel2);
+  //***************************
 
   // Serial port for debugging purposes
   Serial.begin(115200);
@@ -160,7 +158,6 @@ void setup() {
   // Start server
   server.begin();
 
-  notifyClients(get_ds_values());
   notifyClients(get_web_values());
 }
 
@@ -168,18 +165,7 @@ void setup() {
 /***************************************************************
  * Funcionamiento del programa
  ***************************************************************/
-void loop() {
-  // increase the LED brightness
-  for(int dutyCycle = 0; dutyCycle <= 255; dutyCycle++){   
-    // changing the LED brightness with PWM
-    ledcWrite(ledChannel, dutyCycle);
-    delay(15);
-  }
-
-  // decrease the LED brightness
-  for(int dutyCycle = 255; dutyCycle >= 0; dutyCycle--){
-    // changing the LED brightness with PWM
-    ledcWrite(ledChannel, dutyCycle);   
-    delay(15);
-  }
+void loop() {   
+  // changing the LED brightness with PWM
+  ledcWrite(ledChannel, dutyCycle);
 }
