@@ -100,7 +100,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         <span id="watch_f"></span>Hz
       </div>
       <div>
-        <input type="range" id="slider_f" oninput="updateFreqSlider(this)" onchange="sendFreqSlider(this)" min="0" max="1000" step="1" value ="100" class="input_slider">
+        <input type="range" id="slider_f" oninput="updateFreqSlider(this)" onchange="sendFreqSlider(this)" min="0" max="500" step="1" value ="100" class="input_slider">
       </div>
     </div>
   </div>
