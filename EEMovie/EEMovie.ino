@@ -186,5 +186,6 @@ void loop() {
 
   // changing the LED brightness with PWM
   int dutyCycle = 100;  //dutyCycle must me between 0-255
-  ledcWrite(ledChannel, slider_f);
+  dutyfrec = atoi(slider_f)
+  ledcWrite(ledChannel, dutyfrec);
 }
