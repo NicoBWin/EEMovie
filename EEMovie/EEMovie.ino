@@ -49,7 +49,7 @@ float floatMap(float x, float in_min, float in_max, float out_min, float out_max
  ***************************************************************/
 JSONVar web_info;
 
-String slider_f = "0";
+String slider_f = "40";
 String checkbox = "false";
 
 const char* PARAM_INPUT = "value";
@@ -184,8 +184,11 @@ void loop() {
   Serial.println(voltage);
   delay(1000);
 
-  // changing the LED brightness with PWM
-  int dutyCycle = 100;  //dutyCycle must me between 0-255
-  dutyfrec = atoi(slider_f)
-  ledcWrite(ledChannel, dutyfrec);
+  // changing the PWM from webpage
+  if(checkbox != "false"){
+    ledcWrite(ledChannel, slider_f.toInt());
+  } 
+  else {
+    ledcWrite(ledChannel, 10);
+  }
 }
