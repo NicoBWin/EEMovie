@@ -29,8 +29,8 @@ const int PWMPin = 4;  // 4 corresponds to GPIO4
 const int PWMPin2 = 2;  // 2 corresponds to GPIO2
 
 // Setting PWM properties
-const int freq = 500;
-const int freq2 = 1000;
+const int freq = 40;
+const int freq2 = 500;
 const int ledChannel = 0;
 const int ledChannel2 = 0;
 const int resolution = 8;
@@ -184,12 +184,12 @@ void loop() {
 
   // changing the PWM from webpage
   if(checkbox != "false"){
-    ledcWrite(ledChannel2, slider_f.toInt());
-    ledcSetup(ledChannel, analogValue, resolution);
+    ledcWrite(ledChannel2, 127);
+    ledcSetup(ledChannel, slider_f.toInt(), resolution);
     ledcWrite(ledChannel, 127);
   } 
   else {
-    ledcSetup(ledChannel, freq2, resolution);
+    ledcSetup(ledChannel, freq, resolution);
     ledcWrite(ledChannel, 127);
     ledcWrite(ledChannel2, 0);
   }
