@@ -18,7 +18,7 @@
 /***************************************************************
  * Setup Server credentials
  ***************************************************************/
-const char* ssid     = "FINAL4";
+const char* ssid     = "FINAL5";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
@@ -134,8 +134,6 @@ void setup() {
       slider_f = inputMessage;
       Serial.print("Slider_f value: ");
       Serial.println(slider_f);
-
-      outputVal = slider_f;
       
       notifyClients(get_web_values());
     }
@@ -188,5 +186,5 @@ void loop() {
 
   // changing the LED brightness with PWM
   int dutyCycle = 100;  //dutyCycle must me between 0-255
-  ledcWrite(ledChannel, dutyCycle);
+  ledcWrite(ledChannel, slider_f);
 }
