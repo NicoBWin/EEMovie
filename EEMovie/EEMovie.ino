@@ -18,7 +18,7 @@
 /***************************************************************
  * Setup Server credentials
  ***************************************************************/
-const char* ssid     = "FINAL5";
+const char* ssid     = "FINAL8";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
@@ -184,14 +184,14 @@ void loop() {
 
   // changing the PWM from webpage
   if(checkbox != "false"){
-    ledcWrite(ledChannel, slider_f.toInt());
-    ledcSetup(ledChannel2, analogValue, resolution);
-    ledcWrite(ledChannel2, 127);
+    ledcWrite(ledChannel2, slider_f.toInt());
+    ledcSetup(ledChannel, analogValue, resolution);
+    ledcWrite(ledChannel, 127);
   } 
   else {
-    ledcSetup(ledChannel2, freq2, resolution);
-    ledcWrite(ledChannel2, 127);
-    ledcWrite(ledChannel, 0);
+    ledcSetup(ledChannel, freq2, resolution);
+    ledcWrite(ledChannel, 127);
+    ledcWrite(ledChannel2, 0);
   }
   delay(10); //Para no loopear tan rápido 
 }
