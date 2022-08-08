@@ -11,7 +11,7 @@
  * Configuracion Rapida
  ***************************************************************/
 
-const char* ssid     = "FINAL";
+const char* ssid     = "FINAL2";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
