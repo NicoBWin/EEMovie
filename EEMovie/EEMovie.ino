@@ -180,15 +180,18 @@ void loop() {
   // print out the value you read:
   Serial.print("Analog: ");
   Serial.print(analogValue);
-  Serial.print(", Voltage: ");
-  Serial.println(voltage);
-  delay(1000);
+  
 
   // changing the PWM from webpage
   if(checkbox != "false"){
     ledcWrite(ledChannel, slider_f.toInt());
+    ledcSetup(ledChannel2, analogValue, resolution);
+    ledcWrite(ledChannel2, 127);
   } 
   else {
-    ledcWrite(ledChannel, 10);
+    ledcSetup(ledChannel2, freq2, resolution);
+    ledcWrite(ledChannel2, 127);
+    ledcWrite(ledChannel, 0);
   }
+  delay(10); //Para no loopear tan rápido 
 }
