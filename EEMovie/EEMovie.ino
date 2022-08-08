@@ -35,6 +35,15 @@ const int ledChannel = 0;
 const int ledChannel2 = 0;
 const int resolution = 8;
 
+
+/***************************************************************
+ * Setup Pote
+ ***************************************************************/
+float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+
 /***************************************************************
  * Setup servidor web
  ***************************************************************/
@@ -157,7 +166,6 @@ void setup() {
 
   // Start server
   server.begin();
-
   notifyClients(get_web_values());
 }
 
@@ -166,6 +174,19 @@ void setup() {
  * Funcionamiento del programa
  ***************************************************************/
 void loop() {   
+  // Pote
+  // read the input on analog pin GIOP36:
+  int analogValue = analogRead(36);
+  // Rescale to potentiometer's voltage (from 0V to 3.3V):
+  float voltage = floatMap(analogValue, 0, 4095, 0, 3.3);
+  // print out the value you read:
+  Serial.print("Analog: ");
+  Serial.print(analogValue);
+  Serial.print(", Voltage: ");
+  Serial.println(voltage);
+  delay(1000);
+
   // changing the LED brightness with PWM
+  int dutyCycle = 100;  //dutyCycle must me between 0-255
   ledcWrite(ledChannel, dutyCycle);
 }
