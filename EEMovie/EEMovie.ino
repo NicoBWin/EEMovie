@@ -18,21 +18,18 @@
 /***************************************************************
  * Setup Server credentials
  ***************************************************************/
-const char* ssid     = "FINAL8";
+const char* ssid     = "ESP_MOVIE";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
  * Setup PWM
  ***************************************************************/
 // The ouputs
-const int PWMPin1 = 4;  // 4 corresponds to GPIO4
-const int PWMPin2 = 2;  // 2 corresponds to GPIO2
+const int PWMPin1 = 2;  // 2 corresponds to GPIO2  
 
 // Setting PWM properties
-const int freq1 = 500;
-const int freq2 = 500;
+const int freq1 = 100;
 const int ledChannel = 1;
-const int ledChannel2 = 2;
 const int resolution = 8;
 
 
@@ -49,7 +46,7 @@ float floatMap(float x, float in_min, float in_max, float out_min, float out_max
  ***************************************************************/
 JSONVar web_info;
 
-String slider_f = "40";
+String slider_f = "100";
 String checkbox = "false";
 
 const char* PARAM_INPUT = "value";
@@ -96,7 +93,6 @@ void initWebSocket() {
 void setup() {
   // Attach the channel to the GPIO to be controlled
   ledcAttachPin(PWMPin1, ledChannel);
-  ledcAttachPin(PWMPin2, ledChannel2);
   //***************************
   
   // Serial port for debugging purposes
@@ -129,8 +125,8 @@ void setup() {
     if(request->hasParam(PARAM_INPUT)) {
       inputMessage = request->getParam(PARAM_INPUT)->value();
       slider_f = inputMessage;
-      Serial.print("Slider_f value: ");
-      Serial.println(slider_f);
+      //Serial.print("Slider_f value: ");
+      //Serial.println(slider_f);
       
       notifyClients(get_web_values());
     }
@@ -143,13 +139,13 @@ void setup() {
   // Rutina de cambio de checkbox
   server.on("/checkbox", HTTP_GET, [](AsyncWebServerRequest * request){
     String inputMessage;
-    Serial.print("checkbox inputmessage: ");
-    Serial.println(inputMessage);
+    //Serial.print("checkbox inputmessage: ");
+    //Serial.println(inputMessage);
     if(request->hasParam(PARAM_INPUT)) {
       inputMessage = request->getParam(PARAM_INPUT)->value();
       checkbox = inputMessage;
-      Serial.print("checkbox value: ");
-      Serial.println(checkbox);
+      //Serial.print("checkbox value: ");
+      //Serial.println(checkbox);
 
       notifyClients(get_web_values());
     }
@@ -176,23 +172,18 @@ void loop() {
   float duty = floatMap(analogValue, 0, 4095, 0, 255);
   // print out the value you read:
   //Serial.print("Analog: ");
-  //Serial.print((int) duty);
+  //Serial.println((int) duty);
   
-  ledcSetup(ledChannel2, freq2, resolution);
   int Webfrec = slider_f.toInt();
     
   // changing the PWM from webpage
   if(checkbox != "false"){
     ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
-    ledcWrite(ledChannel, 127);
-
-    ledcWrite(ledChannel2, (int) duty);
+    ledcWrite(ledChannel, (int) duty);
   } 
   else {
     ledcSetup(ledChannel, freq1, resolution);
     ledcWrite(ledChannel, 127);
-    
-    ledcWrite(ledChannel2, 0);
   }
-  delay(10); //Para no loopear tan rápido 
+  delay(20); //Para no loopear tan rápido 
 }

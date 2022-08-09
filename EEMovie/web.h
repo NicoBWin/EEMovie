@@ -100,7 +100,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         <span id="watch_f"></span>Hz
       </div>
       <div>
-        <input type="range" id="slider_f" oninput="updateFreqSlider(this)" onchange="sendFreqSlider(this)" min="0" max="500" step="1" value ="100" class="input_slider">
+        <input type="range" id="slider_f" oninput="updateFreqSlider(this)" onchange="sendFreqSlider(this)" min="100" max="1000" step="1" value ="100" class="input_slider">
       </div>
     </div>
   </div>
@@ -137,15 +137,16 @@ function toggle_ctrl(element) {
 }
 
 function sendFreqSlider(element){
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "/slider_f?value="+element.value, true);
-  xhr.send();
+  
 }
 
 function updateFreqSlider(element) {
   //var sliderVal = Math.floor(Math.pow(10, +element.value));
   //watch_f.innerHTML = sliderVal;
   watch_f.innerHTML = element.value
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "/slider_f?value="+element.value, true);
+  xhr.send();
 }
 
 
