@@ -113,14 +113,6 @@ void initWebSocket() {
   server.addHandler(&ws);
 }
 
-String processor(const String& var){
-  //Serial.println(var);
-  if(var == "slider_d"){
-    return ds_temp;
-  }
-  return String();
-}
-
 /***************************************************************
  * Setup del ESP
  ***************************************************************/

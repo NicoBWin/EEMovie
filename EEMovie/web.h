@@ -9,8 +9,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     background-color:white;
   }
   html {font-family: Arial; display: inline-block;  margin: 0px auto;}
-  .topnav {overflow: hidden;background-color: #0A1128;}
-  img {display: block;margin-left: auto;margin-right: auto;}
+  .topnav {overflow: hidden; background-color: #0A1128;}
+  img {display: block; margin-left: auto;margin-right: auto;}
   div{
     background-color: #FFFFFF;
     margin: 5%;
@@ -80,7 +80,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 
   <div align=center>
     <h1 style="color:#b30000;font-size:25px;">Electro-estimulador</h1>
-  <div/>
+  </div>
   
   <div id="ds_state_card" class="card_s" align=center>
     
