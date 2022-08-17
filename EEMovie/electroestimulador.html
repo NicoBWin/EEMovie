@@ -126,6 +126,7 @@
     <div>
       <input type="range" id="slider_d" min="0" max="100" step="1" value ="0" class="input_slider" disabled>
     </div>
+  </div>
 </div>
 
 </body>
@@ -226,10 +227,7 @@ function onMessage(event) {
       else if( key == "slider_d" )
       {
         var element = document.getElementById(key);
-        //console.log(element.id);
-        
-        var sliderID = element.id.charAt(element.id.length-1);
-        var watch = document.getElementById("watch_"+sliderID);
+        var watch = document.getElementById("watch_d");
         element.value = myObj[key];
         watch.innerHTML = myObj[key];
       }
