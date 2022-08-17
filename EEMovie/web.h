@@ -96,7 +96,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     
     <div class="ctrl_sw" id="onctrl">
       <label class="switch">
-        <input type="checkbox" id="sw_ctrl" onchange="toggle_ctrl(this)">
+        <input type="checkbox" id="sw_ctrl" onchange="toggle_ctrl(this)" readonly>
         <span class="slider"></span>
       </label>
     
@@ -121,12 +121,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     <div class="card_title">
       Ciclo de Trabajo
     </div>
-    <div class="watch">
-      <span id="watch_d"></span>%
-    </div>
-    <div>
-      <input type="range" id="slider_d" min="0" max="100" step="1" value ="0" class="input_slider" disabled>
-    </div>
+    <div class="ds-labels"><span id="slider_d"></span><span class="units">%</span></div>
+  </div>
 </div>
 
 </body>
@@ -135,12 +131,9 @@ const char index_html[] PROGMEM = R"rawliteral(
 
 var card_f = document.getElementById("card_freq");
 var slider_f = document.getElementById("slider_f");
-var watch_f = document.getElementById("watch_f");
 var slider_d = document.getElementById("slider_d");
-var watch_d = document.getElementById("watch_d");
 
 watch_f.innerHTML = slider_f.value;
-watch_d.innerHTML = slider_d.value;
 
 var ds_state = document.getElementById("ds_state");
 var watch_state = document.getElementById("watch_state");
@@ -210,6 +203,8 @@ function onMessage(event) {
     var myObj = JSON.parse(event.data);
     var keys = Object.keys(myObj);
 
+    console.log('msg recieved');
+
     for (var i = 0; i < keys.length; i++){
       var key = keys[i];
       if( key == "sw_ctrl" )
@@ -226,13 +221,8 @@ function onMessage(event) {
       }
       else if( key == "slider_d" )
       {
-        var element = document.getElementById(key);
-        //console.log(element.id);
-        
-        var sliderID = element.id.charAt(element.id.length-1);
-        var watch = document.getElementById("watch_"+sliderID);
-        element.value = myObj[key];
-        watch.innerHTML = myObj[key];
+        console.log('duty changed');
+        slider_d.innerHTML = myObj[key];
       }
     }
 }

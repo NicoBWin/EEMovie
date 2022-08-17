@@ -18,19 +18,22 @@
 /***************************************************************
  * Setup Server credentials
  ***************************************************************/
-const char* ssid     = "ESP_MOVIE";
+const char* ssid     = "ESP_IMPACTADOS_ALAN";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
  * Input
  ***************************************************************/
 #define BUTTON_PIN 21  // GIOP21 pin connected to button
-#define LEDGN_PIN 32  // GIOP21 pin connected to button
-#define LEDRD_PIN 33  // GIOP21 pin connected to button 
+#define BUTTON_ONOFF_PIN 3  // GIOP21 pin connected to button
+#define LEDGN_PIN 32  // 
+#define LEDRD_PIN 33  //  
+#define LEDSS_PIN 25  //  
 
 // Variables will change:
 int lastState = LOW;  // the previous state from the input pin
 int currentState;     // the current reading from the input pin
+int OnOffState = LOW; // the current reading from the input pin
 
 //VARIABLE MALA
 int count = 0;
@@ -61,7 +64,7 @@ JSONVar web_info;
 JSONVar ds_info;
 
 String slider_f = "100";
-String slider_d = "50";
+String slider_d = "10";
 String checkbox = "false";
 
 const char* PARAM_INPUT = "value";
@@ -71,14 +74,14 @@ AsyncWebSocket ws("/ws");
 
 String get_web_values(){
   web_info["slider_f"] = slider_f;
-  web_info["sw_ctrl"] = checkbox;
+  //web_info["sw_ctrl"] = checkbox;
 
   return JSON.stringify(web_info);
 }
 
 String get_ds_values(){
   ds_info["slider_d"] = slider_d;
-  //ds_info["sw_ctrl"] = checkbox;
+  ds_info["sw_ctrl"] = checkbox;
 
   return JSON.stringify(web_info);
 }
@@ -98,6 +101,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
       break;
     case WS_EVT_DATA:
       //handleWebSocketMessage(arg, data, len);
+      Serial.printf("incoming message");
       break;
     case WS_EVT_PONG:
     case WS_EVT_ERROR:
@@ -109,6 +113,13 @@ void initWebSocket() {
   server.addHandler(&ws);
 }
 
+String processor(const String& var){
+  //Serial.println(var);
+  if(var == "slider_d"){
+    return ds_temp;
+  }
+  return String();
+}
 
 /***************************************************************
  * Setup del ESP
@@ -116,9 +127,11 @@ void initWebSocket() {
 void setup() {
   // Defino el boton como pullup
   pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_ONOFF_PIN, INPUT_PULLUP);
 
   pinMode(LEDGN_PIN, OUTPUT);
   pinMode(LEDRD_PIN, OUTPUT);
+  pinMode(LEDSS_PIN, OUTPUT);
 
   // Attach the channel to the GPIO to be controlled
   ledcAttachPin(PWMPin1, ledChannel);
@@ -187,6 +200,7 @@ void setup() {
   // Start server
   server.begin();
   notifyClients(get_web_values());
+  notifyClients(get_ds_values());
 }
 
 
@@ -194,60 +208,59 @@ void setup() {
  * Funcionamiento del programa
  ***************************************************************/
 void loop() {   
-  // Pote
-  int analogValue = analogRead(36); // Read the input on analog pin GIOP36
-  String slider_d = String(analogValue);
-  float duty = floatMap(analogValue, 0, 4095, 0, 255); // Rescale to potentiometer's voltage (from 0V to 3.3V)
-  //*********************************************
+  OnOffState = digitalRead(BUTTON_ONOFF_PIN);
+  if (OnOffState == LOW){
+    digitalWrite(LEDSS_PIN, HIGH);
+    // Pote
+    int analogValue = analogRead(36); // Read the input on analog pin GIOP36
+    String slider_d = String(floor(analogValue));
+    float duty = floatMap(analogValue, 0, 4095, 0, 255); // Rescale to potentiometer's voltage (from 0V to 3.3V)
+    //*********************************************
+    
+    // PWM
+    int Webfrec = slider_f.toInt();  // changing the PWM from webpage
 
-  // print out the value you read:
-  //Serial.print("Analog: ");
-  //Serial.println((int) duty);
-  
-  // PWM
-  int Webfrec = slider_f.toInt();  // changing the PWM from webpage
-  if(checkbox != "false"){
-    //ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
-    //ledcWrite(ledChannel, (int) duty);
-  } 
-  else {
-    //ledcSetup(ledChannel, freq1, resolution);
-    //ledcWrite(ledChannel, 127);
-  }
-  //*********************************************
+    //*********************************************
 
-  // Button
-  // read the state of the switch/button:
-  currentState = digitalRead(BUTTON_PIN);
+    // Button
+    // read the state of the switch/button:
+    currentState = digitalRead(BUTTON_PIN);
 
-  if (lastState == HIGH && currentState == LOW)
-    count = 50; 
-  else if (lastState == LOW && currentState == HIGH)
-    count = 50;
+    if (lastState == HIGH && currentState == LOW)
+      count = 100; 
+    else if (lastState == LOW && currentState == HIGH)
+      count = 100;
 
-  // save the the last state
-  lastState = currentState;
-  //*********************************************
+    // save the the last state
+    lastState = currentState;
+    //*********************************************
 
-  digitalWrite(LEDGN_PIN, HIGH); // turn the LED GREEN on
-  // Timer
-  //TIMER ENCENDIDO
-  if (count > 0) {
-    count--;
-    ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
-    ledcWrite(ledChannel, (int) duty);
-    digitalWrite(LEDRD_PIN, LOW); // turn the LED RED off
-  }
-  //TIMER EXPIRADO
-  else {
-    count = 0;
-    ledcSetup(ledChannel, freq1, resolution);
-    ledcWrite(ledChannel, 0);
-    Serial.println("Timer expired");
+    digitalWrite(LEDGN_PIN, HIGH); // turn the LED GREEN on
+    // Timer
+    //TIMER ENCENDIDO
+    if (count > 0) {
+      count--;
+      ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
+      ledcWrite(ledChannel, (int) duty);
+      digitalWrite(LEDRD_PIN, LOW); // turn the LED RED off
+      checkbox = true;
+    }
+    //TIMER EXPIRADOs
+    else {
+      count = 0;
+      ledcSetup(ledChannel, freq1, resolution);
+      ledcWrite(ledChannel, 0);
+      digitalWrite(LEDRD_PIN, HIGH); // turn the LED RED on
+      checkbox = false;
+      //Serial.println("Timer expired");
+    }
     notifyClients(get_ds_values());
-    digitalWrite(LEDRD_PIN, HIGH); // turn the LED RED on
+
+    delay(20); //Para no loopear tan rápido 
   }
-
-
-  delay(20); //Para no loopear tan rápido 
+  else {
+    digitalWrite(LEDGN_PIN, LOW); // turn the LED GREEN off
+    digitalWrite(LEDRD_PIN, LOW); // turn the LED GREEN off
+    digitalWrite(LEDSS_PIN, LOW); // turn the LEDs off
+  }
 }
