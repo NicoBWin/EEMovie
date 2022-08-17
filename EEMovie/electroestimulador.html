@@ -18,20 +18,25 @@
   }
   div.content{
     position: relative;
-    height: 200px;
+    height: 170px;
   }
   div.card_s{
-    margin: 5%;
+    margin: auto;
     padding: 2.5%;
     border: 3px solid black;
+    width: 150px;
+    height: 170px;
     box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
   }
   div.card{
-    position: absolute;
+    /*position: absolute;
     margin: 0%;
     top:0;
-    left:0;
-    width: 94%;
+    left:0;*/
+    margin: auto;
+    padding: 2.5%;
+    width: 200px/*94%*/;
+    height: 150px;
     border: 3px solid black;
     box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
   }
@@ -51,15 +56,17 @@
   .ds-labels{
     font-size: 1.5rem;
     line-height: 2rem;
-    height: 2rem;
+    height: 0rem;
     vertical-align:middle;
-    padding-bottom: 15px;
+    padding-bottom: 0px;
   }
   .input_slider{
     width:90%;
     margin-left: 5%;
     margin-right: 5%;
+    accent-color: #b30000;
   }
+
     .switch {position: relative; display: inline-block; width: 4.8rem; height: 2.4rem} 
     .switch input {display: none}
     .slider {position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 6px}
@@ -75,22 +82,27 @@
   <div/>
   
   <div id="ds_state_card" class="card_s" align=center>
+    
     <div class="card-title">
         <span style="color:#b30000;font-size:20px;font-weight:bold;">Estado</span>
     </div>
+    
     <div class="ds-labels"><span id="ds_state"></span></div>
+    
     <div class="watch">
         <span id="watch_state"></span>
     </div>
+    
     <div class="ctrl_sw" id="onctrl">
       <label class="switch">
         <input type="checkbox" id="sw_ctrl" onchange="toggle_ctrl(this)">
         <span class="slider"></span>
       </label>
+    
     </div>
   </div>
 
-  <div class="content">
+  <div class="content" align=center>
     <div id="card_freq" class="card" align=center>
       <div class="card_title">
         Frecuencia
@@ -99,10 +111,22 @@
         <span id="watch_f"></span>Hz
       </div>
       <div>
-        <input type="range" id="slider_f" oninput="updateFreqSlider(this)" onchange="sendFreqSlider(this)" min="0" max="500" step="1" value ="100" class="input_slider">
+        <input type="range" id="slider_f" oninput="updateFreqSlider(this)" onchange="sendFreqSlider(this)" min="0" max="500" step="100" value ="100" class="input_slider">
       </div>
     </div>
   </div>
+
+  <div id="card_duty" class="card" align=center>
+    <div class="card_title">
+      Ciclo de Trabajo
+    </div>
+    <div class="watch">
+      <span id="watch_d"></span>%
+    </div>
+    <div>
+      <input type="range" id="slider_d" min="0" max="100" step="1" value ="0" class="input_slider" disabled>
+    </div>
+</div>
 
 </body>
 
@@ -111,8 +135,11 @@
 var card_f = document.getElementById("card_freq");
 var slider_f = document.getElementById("slider_f");
 var watch_f = document.getElementById("watch_f");
+var slider_d = document.getElementById("slider_d");
+var watch_d = document.getElementById("watch_d");
 
 watch_f.innerHTML = slider_f.value;
+watch_d.innerHTML = slider_d.value;
 
 var ds_state = document.getElementById("ds_state");
 var watch_state = document.getElementById("watch_state");
@@ -184,25 +211,7 @@ function onMessage(event) {
 
     for (var i = 0; i < keys.length; i++){
       var key = keys[i];
-      if(key == "ds_state")
-      {
-        ds_temp.innerHTML = myObj[key];
-      }
-      else if(key == "ds_bool")
-      {
-        if(myObj[key]=="1")  //  Sensor not connected
-        {
-          sw_ctrl.disabled = true;
-          sw_ctrl.checked = false;
-          toggle_ctrl(sw_ctrl);
-          
-        }
-        else  //  Sensor connected
-        {
-          sw_ctrl.disabled = false;
-        }
-      }
-      else if( key == "sw_ctrl" )
+      if( key == "sw_ctrl" )
       {
         if(myObj[key] == "false")
         {
@@ -214,7 +223,7 @@ function onMessage(event) {
           sw_ctrl.checked = true;
         }
       }
-      else if( key == "slider_f" )
+      else if( key == "slider_d" )
       {
         var element = document.getElementById(key);
         //console.log(element.id);
