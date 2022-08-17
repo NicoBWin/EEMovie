@@ -22,10 +22,21 @@ const char* ssid     = "ESP_MOVIE";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
+ * Input
+ ***************************************************************/
+#define BUTTON_PIN 21  // GIOP21 pin connected to button 
+
+// Variables will change:
+int lastState = LOW;  // the previous state from the input pin
+int currentState;     // the current reading from the input pin
+
+//VARIABLE MALA
+int count = 0;
+/***************************************************************
  * Setup PWM
  ***************************************************************/
 // The ouputs
-const int PWMPin1 = 2;  // 2 corresponds to GPIO2  
+const int PWMPin1 = 2;  // 2 corresponds to GPIO2
 
 // Setting PWM properties
 const int freq1 = 100;
@@ -91,6 +102,9 @@ void initWebSocket() {
  * Setup del ESP
  ***************************************************************/
 void setup() {
+  // Defino el boton como pullup
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+
   // Attach the channel to the GPIO to be controlled
   ledcAttachPin(PWMPin1, ledChannel);
   //***************************
@@ -166,24 +180,52 @@ void setup() {
  ***************************************************************/
 void loop() {   
   // Pote
-  // read the input on analog pin GIOP36:
-  int analogValue = analogRead(36);
-  // Rescale to potentiometer's voltage (from 0V to 3.3V):
-  float duty = floatMap(analogValue, 0, 4095, 0, 255);
+  int analogValue = analogRead(36); // Read the input on analog pin GIOP36
+  float duty = floatMap(analogValue, 0, 4095, 0, 255); // Rescale to potentiometer's voltage (from 0V to 3.3V)
+  //*********************************************
+
   // print out the value you read:
   //Serial.print("Analog: ");
   //Serial.println((int) duty);
   
-  int Webfrec = slider_f.toInt();
-    
-  // changing the PWM from webpage
+  // PWM
+  int Webfrec = slider_f.toInt();  // changing the PWM from webpage
   if(checkbox != "false"){
-    ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
-    ledcWrite(ledChannel, (int) duty);
+    //ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
+    //ledcWrite(ledChannel, (int) duty);
   } 
   else {
-    ledcSetup(ledChannel, freq1, resolution);
-    ledcWrite(ledChannel, 127);
+    //ledcSetup(ledChannel, freq1, resolution);
+    //ledcWrite(ledChannel, 127);
   }
+  //*********************************************
+
+  // Button
+  // read the state of the switch/button:
+  currentState = digitalRead(BUTTON_PIN);
+
+  if (lastState == HIGH && currentState == LOW)
+    count = 50; 
+  else if (lastState == LOW && currentState == HIGH)
+    count = 50;
+
+  // save the the last state
+  lastState = currentState;
+  //*********************************************
+
+  // Timer
+  if (count > 0) {
+    count--;
+    ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
+    ledcWrite(ledChannel, (int) duty);
+  }
+  else {
+    count = 0;
+    ledcSetup(ledChannel, freq1, resolution);
+    ledcWrite(ledChannel, 0);
+    Serial.println("Timer expired");
+  }
+
+
   delay(20); //Para no loopear tan rápido 
 }
