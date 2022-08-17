@@ -24,7 +24,9 @@ const char* password = "123456789"; //Capaz usar solo numeros
 /***************************************************************
  * Input
  ***************************************************************/
-#define BUTTON_PIN 21  // GIOP21 pin connected to button 
+#define BUTTON_PIN 21  // GIOP21 pin connected to button
+#define LEDGN_PIN 32  // GIOP21 pin connected to button
+#define LEDRD_PIN 33  // GIOP21 pin connected to button 
 
 // Variables will change:
 int lastState = LOW;  // the previous state from the input pin
@@ -56,6 +58,7 @@ float floatMap(float x, float in_min, float in_max, float out_min, float out_max
  * Setup servidor web
  ***************************************************************/
 JSONVar web_info;
+JSONVar ds_info;
 
 String slider_f = "100";
 String slider_d = "50";
@@ -69,6 +72,13 @@ AsyncWebSocket ws("/ws");
 String get_web_values(){
   web_info["slider_f"] = slider_f;
   web_info["sw_ctrl"] = checkbox;
+
+  return JSON.stringify(web_info);
+}
+
+String get_ds_values(){
+  ds_info["slider_d"] = slider_d;
+  //ds_info["sw_ctrl"] = checkbox;
 
   return JSON.stringify(web_info);
 }
@@ -106,6 +116,9 @@ void initWebSocket() {
 void setup() {
   // Defino el boton como pullup
   pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  pinMode(LEDGN_PIN, OUTPUT);
+  pinMode(LEDRD_PIN, OUTPUT);
 
   // Attach the channel to the GPIO to be controlled
   ledcAttachPin(PWMPin1, ledChannel);
@@ -183,6 +196,7 @@ void setup() {
 void loop() {   
   // Pote
   int analogValue = analogRead(36); // Read the input on analog pin GIOP36
+  String slider_d = String(analogValue);
   float duty = floatMap(analogValue, 0, 4095, 0, 255); // Rescale to potentiometer's voltage (from 0V to 3.3V)
   //*********************************************
 
@@ -215,17 +229,23 @@ void loop() {
   lastState = currentState;
   //*********************************************
 
+  digitalWrite(LEDGN_PIN, HIGH); // turn the LED GREEN on
   // Timer
+  //TIMER ENCENDIDO
   if (count > 0) {
     count--;
     ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
     ledcWrite(ledChannel, (int) duty);
+    digitalWrite(LEDRD_PIN, LOW); // turn the LED RED off
   }
+  //TIMER EXPIRADO
   else {
     count = 0;
     ledcSetup(ledChannel, freq1, resolution);
     ledcWrite(ledChannel, 0);
     Serial.println("Timer expired");
+    notifyClients(get_ds_values());
+    digitalWrite(LEDRD_PIN, HIGH); // turn the LED RED on
   }
 
 
