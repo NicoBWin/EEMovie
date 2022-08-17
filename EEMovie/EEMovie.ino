@@ -34,6 +34,7 @@ const char* password = "123456789"; //Capaz usar solo numeros
 int lastState = LOW;  // the previous state from the input pin
 int currentState;     // the current reading from the input pin
 int OnOffState = LOW; // the current reading from the input pin
+int onFlag = LOW;
 
 //VARIABLE MALA
 int count = 0;
@@ -55,8 +56,9 @@ const int resolution = 8;
 float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-
-
+float duty;
+int analogValue;
+int lastDuty;
 /***************************************************************
  * Setup servidor web
  ***************************************************************/
@@ -83,7 +85,7 @@ String get_ds_values(){
   ds_info["slider_d"] = slider_d;
   ds_info["sw_ctrl"] = checkbox;
 
-  return JSON.stringify(web_info);
+  return JSON.stringify(ds_info);
 }
 
 void notifyClients(String notif){
@@ -95,6 +97,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
     case WS_EVT_CONNECT:
       Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
       notifyClients(get_web_values());
+      //notifyClients(get_ds_values());
       break;
     case WS_EVT_DISCONNECT:
       Serial.printf("WebSocket client #%u disconnected\n", client->id());
@@ -127,6 +130,7 @@ void setup() {
 
   // Attach the channel to the GPIO to be controlled
   ledcAttachPin(PWMPin1, ledChannel);
+  analogValue = analogRead(36); // Read the input on analog pin GIOP36
   //***************************
   
   // Serial port for debugging purposes
@@ -171,7 +175,7 @@ void setup() {
   });
 
   // Rutina de cambio de checkbox
-  server.on("/checkbox", HTTP_GET, [](AsyncWebServerRequest * request){
+  /*server.on("/checkbox", HTTP_GET, [](AsyncWebServerRequest * request){
     String inputMessage;
     //Serial.print("checkbox inputmessage: ");
     //Serial.println(inputMessage);
@@ -187,7 +191,7 @@ void setup() {
       inputMessage = "No message sent";
     }
     request->send_P(200, "text/plain", "OK");
-  });
+  });*/
 
   // Start server
   server.begin();
@@ -202,11 +206,23 @@ void setup() {
 void loop() {   
   OnOffState = digitalRead(BUTTON_ONOFF_PIN);
   if (OnOffState == LOW){
+    if(onFlag == HIGH){
+      Serial.println("ON");
+      checkbox = "true";
+      notifyClients(get_ds_values());
+      onFlag = LOW;
+    }
     digitalWrite(LEDSS_PIN, HIGH);
     // Pote
-    int analogValue = analogRead(36); // Read the input on analog pin GIOP36
-    String slider_d = String(floor(analogValue));
-    float duty = floatMap(analogValue, 0, 4095, 0, 255); // Rescale to potentiometer's voltage (from 0V to 3.3V)
+    analogValue = analogRead(36); // Read the input on analog pin GIOP36
+    duty = floatMap(analogValue, 0, 4095, 0, 255); // Rescale to potentiometer's voltage (from 0V to 3.3V)
+    if(floor(duty) != lastDuty){
+      slider_d = String(floor(floatMap(duty, 0, 255, 0, 100);));
+      Serial.print("Duty: ");
+      Serial.println(slider_d);
+      notifyClients(get_ds_values());
+    }
+    lastDuty = floor(duty);
     //*********************************************
     
     // PWM
@@ -235,7 +251,6 @@ void loop() {
       ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
       ledcWrite(ledChannel, (int) duty);
       digitalWrite(LEDRD_PIN, LOW); // turn the LED RED off
-      checkbox = true;
     }
     //TIMER EXPIRADOs
     else {
@@ -243,14 +258,18 @@ void loop() {
       ledcSetup(ledChannel, freq1, resolution);
       ledcWrite(ledChannel, 0);
       digitalWrite(LEDRD_PIN, HIGH); // turn the LED RED on
-      checkbox = false;
       //Serial.println("Timer expired");
     }
-    notifyClients(get_ds_values());
 
-    delay(20); //Para no loopear tan rápido 
+    delay(10); //Para no loopear tan rápido 
   }
   else {
+    if(onFlag == LOW){
+      Serial.println("OFF");
+      checkbox = "false";
+      notifyClients(get_ds_values());
+      onFlag = HIGH;
+    }
     digitalWrite(LEDGN_PIN, LOW); // turn the LED GREEN off
     digitalWrite(LEDRD_PIN, LOW); // turn the LED GREEN off
     digitalWrite(LEDSS_PIN, LOW); // turn the LEDs off
