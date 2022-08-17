@@ -58,6 +58,7 @@ float floatMap(float x, float in_min, float in_max, float out_min, float out_max
 JSONVar web_info;
 
 String slider_f = "100";
+String slider_d = "50";
 String checkbox = "false";
 
 const char* PARAM_INPUT = "value";
@@ -75,6 +76,7 @@ String get_web_values(){
 void notifyClients(String notif){
   ws.textAll(notif);
 }
+
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
   switch (type) {
     case WS_EVT_CONNECT:
