@@ -18,7 +18,7 @@
 /***************************************************************
  * Setup Server credentials
  ***************************************************************/
-const char* ssid     = "ESP_IMPACTADOS_ALAN";
+const char* ssid     = "ESP_IMPACTADOS";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
@@ -205,7 +205,7 @@ void setup() {
  ***************************************************************/
 void loop() {   
   OnOffState = digitalRead(BUTTON_ONOFF_PIN);
-  if (OnOffState == LOW){
+  if (OnOffState == LOW) {
     if(onFlag == HIGH){
       Serial.println("ON");
       checkbox = "true";
@@ -213,11 +213,12 @@ void loop() {
       onFlag = LOW;
     }
     digitalWrite(LEDSS_PIN, HIGH);
+
     // Pote
     analogValue = analogRead(36); // Read the input on analog pin GIOP36
     duty = floatMap(analogValue, 0, 4095, 0, 255); // Rescale to potentiometer's voltage (from 0V to 3.3V)
     if(floor(duty) != lastDuty){
-      slider_d = String(floor(floatMap(duty, 0, 255, 0, 100);));
+      slider_d = String(floor(floatMap(duty, 0, 255, 0, 100)));
       Serial.print("Duty: ");
       Serial.println(slider_d);
       notifyClients(get_ds_values());
@@ -228,38 +229,23 @@ void loop() {
     // PWM
     int Webfrec = slider_f.toInt();  // changing the PWM from webpage
 
-    //*********************************************
-
-    // Button
-    // read the state of the switch/button:
+    // Button - read the state of the switch/button:
     currentState = digitalRead(BUTTON_PIN);
 
-    if (lastState == HIGH && currentState == LOW)
-      count = 100; 
-    else if (lastState == LOW && currentState == HIGH)
-      count = 100;
-
-    // save the the last state
-    lastState = currentState;
-    //*********************************************
-
     digitalWrite(LEDGN_PIN, HIGH); // turn the LED GREEN on
-    // Timer
-    //TIMER ENCENDIDO
-    if (count > 0) {
-      count--;
+    if (lastState == HIGH && currentState == LOW) {
       ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
       ledcWrite(ledChannel, (int) duty);
       digitalWrite(LEDRD_PIN, LOW); // turn the LED RED off
     }
-    //TIMER EXPIRADOs
-    else {
-      count = 0;
+    else if (lastState == LOW && currentState == HIGH) {
       ledcSetup(ledChannel, freq1, resolution);
       ledcWrite(ledChannel, 0);
       digitalWrite(LEDRD_PIN, HIGH); // turn the LED RED on
-      //Serial.println("Timer expired");
     }
+    // save the the last state
+    lastState = currentState;
+    //*********************************************
 
     delay(10); //Para no loopear tan rápido 
   }
