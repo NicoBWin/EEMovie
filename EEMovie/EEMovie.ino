@@ -31,7 +31,6 @@ const char* password = "123456789"; //Capaz usar solo numeros
 #define LEDSS_PIN 25  //  
 
 // Variables will change:
-int lastState = LOW;  // the previous state from the input pin
 int currentState;     // the current reading from the input pin
 int OnOffState = LOW; // the current reading from the input pin
 int onFlag = LOW;
@@ -219,8 +218,8 @@ void loop() {
     duty = floatMap(analogValue, 0, 4095, 0, 255); // Rescale to potentiometer's voltage (from 0V to 3.3V)
     if(floor(duty) != lastDuty){
       slider_d = String(floor(floatMap(duty, 0, 255, 0, 100)));
-      Serial.print("Duty: ");
-      Serial.println(slider_d);
+      //Serial.print("Duty: ");
+      //Serial.println(slider_d);
       notifyClients(get_ds_values());
     }
     lastDuty = floor(duty);
@@ -233,18 +232,17 @@ void loop() {
     currentState = digitalRead(BUTTON_PIN);
 
     digitalWrite(LEDGN_PIN, HIGH); // turn the LED GREEN on
-    if (lastState == HIGH && currentState == LOW) {
+    if (currentState == LOW) {
+      Serial.println(duty);
       ledcSetup(ledChannel, Webfrec, resolution); //REVISAR: Anda ~bien pero no actualiza la frecuencia al instante
       ledcWrite(ledChannel, (int) duty);
       digitalWrite(LEDRD_PIN, LOW); // turn the LED RED off
     }
-    else if (lastState == LOW && currentState == HIGH) {
+    else {
       ledcSetup(ledChannel, freq1, resolution);
-      ledcWrite(ledChannel, 0);
+      ledcWrite(ledChannel, 20);
       digitalWrite(LEDRD_PIN, HIGH); // turn the LED RED on
     }
-    // save the the last state
-    lastState = currentState;
     //*********************************************
 
     delay(10); //Para no loopear tan rápido 
