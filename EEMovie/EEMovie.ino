@@ -240,7 +240,7 @@ void loop() {
     }
     else {
       ledcSetup(ledChannel, freq1, resolution);
-      ledcWrite(ledChannel, 20);
+      ledcWrite(ledChannel, 0);
       digitalWrite(LEDRD_PIN, HIGH); // turn the LED RED on
     }
     //*********************************************
