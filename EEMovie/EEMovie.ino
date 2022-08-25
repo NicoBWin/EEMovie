@@ -18,7 +18,7 @@
 /***************************************************************
  * Setup Server credentials
  ***************************************************************/
-const char* ssid     = "ESP_IMPACTADOS";
+const char* ssid     = "ESP_IMPACTADOS4";
 const char* password = "123456789"; //Capaz usar solo numeros
 
 /***************************************************************
@@ -32,6 +32,8 @@ const char* password = "123456789"; //Capaz usar solo numeros
 
 // Variables will change:
 int currentState;     // the current reading from the input pin
+int currentState2;     // the current reading from the input main
+int lastState = LOW;
 int OnOffState = LOW; // the current reading from the input pin
 int onFlag = LOW;
 
@@ -203,8 +205,8 @@ void setup() {
  * Funcionamiento del programa
  ***************************************************************/
 void loop() {   
-  OnOffState = digitalRead(BUTTON_ONOFF_PIN);
-  if (OnOffState == LOW) {
+  currentState2 = digitalRead(BUTTON_ONOFF_PIN);
+  if (currentState2 == LOW){
     if(onFlag == HIGH){
       Serial.println("ON");
       checkbox = "true";
@@ -247,7 +249,7 @@ void loop() {
 
     delay(10); //Para no loopear tan rápido 
   }
-  else {
+  else if (lastState == LOW && currentState2 == HIGH){
     if(onFlag == LOW){
       Serial.println("OFF");
       checkbox = "false";
@@ -258,4 +260,7 @@ void loop() {
     digitalWrite(LEDRD_PIN, LOW); // turn the LED GREEN off
     digitalWrite(LEDSS_PIN, LOW); // turn the LEDs off
   }
+ 
+  // save the the last state
+  lastState = currentState2;
 }
